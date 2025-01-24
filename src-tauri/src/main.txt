@@ -1,0 +1,105 @@
+use std::ffi::{CStr};
+use std::path::Path;
+use std::process::Command;
+use std::ptr;
+use std::thread::sleep;
+use std::time::{Duration, Instant};
+use tauri::command;
+use winapi::shared::windef::HWND;
+use winapi::um::winuser::{
+    EnumWindows, GetWindowTextA, SetForegroundWindow, ShowWindow, SW_MAXIMIZE,
+};
+
+fn open_with_command(command: &str, arg: &str) -> Result<(), String> {
+    Command::new(command)
+        .arg(arg)
+        .spawn()
+        .map_err(|e| format!("Failed to open '{}': {}", command, e))?;
+    Ok(())
+}
+
+fn open_without_command(path: &str) -> Result<(), String> {
+    Command::new("cmd")
+        .args(&["/C", "start", "", path])
+        .spawn()
+        .map_err(|e| format!("Failed to open '{}': {}", path, e))?;
+    Ok(())
+}
+
+fn find_window_by_partial_title(partial_title: &str, timeout: Duration) -> Result<HWND, String> {
+    let start_time = Instant::now();
+    while start_time.elapsed() < timeout {
+        let mut found_hwnd: HWND = ptr::null_mut();
+        unsafe {
+            EnumWindows(
+                Some(enum_window_proc),
+                &mut (partial_title, &mut found_hwnd) as *mut _ as _,
+            );
+        }
+        if !found_hwnd.is_null() {
+            return Ok(found_hwnd);
+        }
+        sleep(Duration::from_millis(100));
+    }
+    Err(format!(
+        "Window with partial title '{}' not found within timeout",
+        partial_title
+    ))
+}
+
+unsafe extern "system" fn enum_window_proc(hwnd: HWND, lparam: isize) -> i32 {
+    let (partial_title, found_hwnd) = &mut *(lparam as *mut (&str, &mut HWND));
+    let mut buffer = [0i8; 512]; // Buffer to hold window title
+    let length = GetWindowTextA(hwnd, buffer.as_mut_ptr(), buffer.len() as i32);
+    if length > 0 {
+        let title = CStr::from_ptr(buffer.as_ptr()).to_string_lossy();
+        if title.contains(*partial_title) { // Dereference `partial_title` here
+            **found_hwnd = hwnd;
+            return 0; // Stop enumeration
+        }
+    }
+    1 // Continue enumeration
+}
+
+
+#[command]
+fn open_project(folder_path: String, project_path: String) -> Result<String, String> {
+    let folder_name = Path::new(&folder_path)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("");
+
+    let explorer_window_title = format!("{} - File Explorer", folder_name);
+
+    // Open Explorer and wait for its window
+    open_without_command(&folder_path)?;
+    let explorer_hwnd = find_window_by_partial_title(&explorer_window_title, Duration::from_secs(2))?;
+    unsafe {
+        ShowWindow(explorer_hwnd, SW_MAXIMIZE);
+        SetForegroundWindow(explorer_hwnd);
+    }
+
+    let project_name = Path::new(&project_path)
+    .file_name()
+    .and_then(|name| name.to_str())
+    .unwrap_or("");
+
+    let code_window_title = format!("{} - Visual Studio Code", project_name);
+    // Open VS Code and wait for its window using partial title matching
+    open_with_command("C:/Program Files/Microsoft VS Code/Code.exe", &project_path)?;
+    let vs_code_hwnd = find_window_by_partial_title(&code_window_title, Duration::from_secs(2))?;
+    unsafe {
+        ShowWindow(vs_code_hwnd, SW_MAXIMIZE);
+        SetForegroundWindow(vs_code_hwnd);
+    }
+
+    Ok(format!("Project initialized: {}", folder_path))
+}
+
+
+fn main() {
+    tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![open_project,generate_speech])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}

@@ -1,0 +1,26 @@
+[
+    {
+        "shortcut": "1",
+        "folder_path": "D:/Synergy/Genesis/Aimxl/Alate",
+        "project_path": "D:/Synergy/Genesis/Aimxl/Alate",
+        "project_name": "Alate"
+    },
+    {
+        "shortcut": "2",
+        "folder_path": "D:/Synergy/Genesis/KPI/TPRM",
+        "project_path": "D:/Synergy/Genesis/KPI/TPRM",
+        "project_name": "TPRM"
+    },
+    {
+        "project_name": "Odyssey - autobot",
+        "shortcut": "3",
+        "folder_path": "D:/Synergy/Odyssey/autobot",
+        "project_path": "D:/Synergy/Odyssey/autobot"
+    },
+    {
+        "project_name": "Test2",
+        "shortcut": "s",
+        "folder_path": "D:/Synergy/Odyssey/autobot",
+        "project_path": "D:/Synergy/Odyssey/autobot"
+    }
+]
