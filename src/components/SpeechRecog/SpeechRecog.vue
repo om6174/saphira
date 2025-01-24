@@ -26,6 +26,10 @@ export default {
       isRecording: false, // Track if recording is in progress
     };
   },
+  mounted(){
+    const projectWaitressRef = this.$refs.projectWaitress; // Get the ref of ProjectWaitress
+
+  },
   methods: {
     startListening() {
       if (this.isRecording) {
@@ -33,7 +37,7 @@ export default {
         this.recognition.stop();
       } else {
         // Start a new recognition instance and update the state
-        this.recognition = startSpeechRecognition(this.updateSpeechResult);
+        this.recognition = startSpeechRecognition(this.updateSpeechResult, this.$refs.projectWaitress);
 
         // Set up onend event to change the state when recognition ends
         this.recognition.onend = () => {

@@ -17,6 +17,7 @@
     "@deepgram/sdk": "^3.9.0",
     "@foobar404/wave": "^2.0.5",
     "@tauri-apps/api": "^2.2.0",
+    "compromise-numbers": "^1.4.0",
     "play-sound": "^1.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -26,7 +27,8 @@
     "vite-plugin-commonjs": "^0.10.4",
     "vite-plugin-externals": "^0.6.2",
     "vue": "^3.5.13",
-    "wavesurfer.js": "^7.8.16"
+    "wavesurfer.js": "^7.8.16",
+    "words-to-numbers": "^1.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",

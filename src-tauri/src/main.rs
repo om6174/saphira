@@ -16,6 +16,7 @@ use std::fs::File;
 use std::io::Read;
 use serde_json;
 use std::env;
+use dotenv::dotenv; // Import dotenv
 
 #[derive(Deserialize, Serialize, Debug)]
 struct ProjectConfig {
@@ -63,6 +64,8 @@ fn read_project_config() -> Result<Vec<ProjectConfig>, String> {
 // Tauri Command to generate speech
 #[command]
 async fn generate_speech(dialogue: String) -> Result<Vec<u8>, String> {
+    dotenv().ok(); // This loads the .env file
+
     let audio_dir = "audio_cache";
     fs::create_dir_all(audio_dir).map_err(|e| e.to_string())?;
 
@@ -86,6 +89,7 @@ async fn generate_speech(dialogue: String) -> Result<Vec<u8>, String> {
             String::new() // Use an empty string or handle the error as needed
         }
     };
+    println!("Generating audio for key: {}", deepgram_api_key);
     let dg_client = Deepgram::new(&deepgram_api_key).map_err(|e| e.to_string())?;
     let options = Options::builder()
         .model(Model::AuraAthenaEn)

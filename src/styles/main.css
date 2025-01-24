@@ -1,51 +1,64 @@
-/* Global Styles */
+/* Global styles for the app */
+html,
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    height: 100vh;
-    width: 100vw;
-    background-color: #3f3e3e;
+    height: 100%;
+    width: 100%;
     box-sizing: border-box;
 }
 
-/* Global styles for the app */
 #app {
     text-align: center;
-    padding: 20px 0;
-    width: 100vw;
+    width: 100%;
+    height: 100vh;
     font-family: Arial, sans-serif;
     background-color: #3f3e3e;
 }
 
 h1 {
     margin-bottom: 30px;
+    margin-top: 0px;
     color: #4CAF50;
     font-size: 36px;
+    padding-top: 25px;
 }
 
-/* Flexbox container for both left and right sections */
+/* Flexbox container for top and bottom rows */
 .main-container {
     display: flex;
+    flex-direction: column;
+    /* Stack rows vertically */
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     flex-wrap: wrap;
     max-width: 80%;
     margin: 0 auto;
+    gap: 20px;
+    /* Add gap between rows */
 }
 
-/* Left Column: Speech Recognition & Speech Synthesis */
-.left-column,
-.right-column {
-    width: 48%;
+/* Top Row: Speech Recognition & Speech Synthesis */
+.top-row {
+    width: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    /* Set to row for horizontal alignment */
+    justify-content: space-between;
     gap: 20px;
 }
 
+/* Bottom Row: Project Waitress */
+.bottom-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    /* Set to row for horizontal alignment */
+    justify-content: space-between;
+    gap: 20px;
+}
+
+/* Section styles remain the same */
 .section {
     padding: 20px;
     background-color: rgb(32, 31, 31);
@@ -56,8 +69,6 @@ h1 {
     align-items: center;
     min-height: 150px;
     width: 100%;
-    /* Ensures the parent div takes the full width */
-
 }
 
 /* Title for each section */
@@ -151,8 +162,8 @@ h1 {
         align-items: center;
     }
 
-    .left-column,
-    .right-column {
+    .top-row,
+    .bottom-row {
         width: 100%;
         align-items: center;
     }

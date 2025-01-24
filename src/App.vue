@@ -2,19 +2,20 @@
   <div id="app">
     <h1>Speech Recognition and Synthesis</h1>
     <div class="main-container">
-      <!-- Left Column: Speech Recognition and Speech Synthesis -->
-      <div class="left-column">
+      <!-- Top Row: Speech Recognition and Speech Synthesis -->
+      <div class="top-row">
         <speech-recognition />
         <speech-synthesis />
       </div>
 
-      <!-- Right Column: Project Waitress -->
-      <div class="right-column">
-        <project-waitress />
+      <!-- Bottom Row: Project Waitress -->
+      <div class="bottom-row">
+        <project-waitress ref="projectWaitress"/>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import SpeechRecognition from "./components/SpeechRecog/SpeechRecog.vue";
