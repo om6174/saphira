@@ -7,6 +7,8 @@
     </div>
 </template>
 
+<style scoped src="./SpeechSynth.css" />
+
 <script>
 
 import DIALOGUES from '../../services/dialogues.js';
@@ -21,8 +23,10 @@ export default {
   methods:{
     speakWithDefaultVoice
   },
-  mounted() {
-    speakWithDefaultVoice(DIALOGUES.WELCOME_DIALOGUE + DIALOGUES.HELP_DIALOGUE);
+  created() {
+    
+    speakWithDefaultVoice(DIALOGUES.WELCOME_DIALOGUE + DIALOGUES.HELP_DIALOGUE, true);
+
   },
 };
 </script>

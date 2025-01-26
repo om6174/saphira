@@ -1,0 +1,43 @@
+.record-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #ff4c4c;
+    /* Default red */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.record-button.recording {
+    background-color: #9b27e9;
+    /* Change to magenta when recording */
+}
+
+.record-button:hover {
+    background-color: #e60000;
+    /* Darker red when hover */
+}
+
+.record-button.recording:hover {
+    background-color: #490e80;
+    /* Change to magenta when hover while recording */
+}
+
+/* Speech result section */
+#speechResult {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-radius: 8px;
+    font-size: 16px;
+    min-height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #666;
+}

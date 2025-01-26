@@ -1,5 +1,31 @@
 import { invoke } from "@tauri-apps/api/core";
-export const speakWithDefaultVoice = async (dialogue) => {
+import eventBus from "../eventBus";
+
+
+export const updateCanvasLineColor = (theme) => {
+    const canvas = document.getElementById('waveform');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height / 2);
+    ctx.lineTo(canvas.width, canvas.height / 2);
+
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Update the canvas line color based on the current theme
+    if (theme === 'light') {
+        ctx.strokeStyle = "black";
+    } else {
+        ctx.strokeStyle = "white";
+    }
+    ctx.lineWidth = 2;
+    ctx.stroke();
+};
+
+
+export const speakWithDefaultVoice = async (dialogue, autoListen) => {
     try {
         const result = await invoke('generate_speech', { dialogue });
         const audio = new Audio(URL.createObjectURL(new Blob([new Uint8Array(result)], { type: 'audio/wav' })));
@@ -10,6 +36,7 @@ export const speakWithDefaultVoice = async (dialogue) => {
         const ctx = canvas.getContext('2d');
         let w = canvas.width = canvas.offsetWidth;
         let h = canvas.height = 200;
+        const isLightTheme = document.body.classList.contains('light');
 
         // Audio context and analyser
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -76,9 +103,15 @@ export const speakWithDefaultVoice = async (dialogue) => {
                     ctx.beginPath();
                     ctx.moveTo(0, h / 2);
                     ctx.lineTo(w, h / 2);
-                    ctx.strokeStyle = "white";
+                    if(isLightTheme)
+                        ctx.strokeStyle = "black";
+                    else
+                        ctx.strokeStyle = "white";                    
                     ctx.lineWidth = 2;
                     ctx.stroke();
+                    if(autoListen){
+                        eventBus.$emit("startListening")
+                    }
                 }
             }, 10);
         };
@@ -95,7 +128,10 @@ export const speakWithDefaultVoice = async (dialogue) => {
             ctx.beginPath();
             ctx.moveTo(0, h / 2);
             ctx.lineTo(w, h / 2);
-            ctx.strokeStyle = "white";
+            if(isLightTheme)
+                ctx.strokeStyle = "black";
+            else
+                ctx.strokeStyle = "white";
             ctx.lineWidth = 2;
             ctx.stroke();
         };

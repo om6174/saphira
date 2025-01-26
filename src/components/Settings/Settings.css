@@ -1,0 +1,172 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.settings-modal {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    animation: popup 0.3s ease-in-out;
+    width: 20%;
+}
+
+/* Dark theme modal styles */
+body.dark .settings-modal {
+    background: #333;
+    /* Dark background */
+    color: white;
+}
+
+/* Light theme modal styles */
+body.light .settings-modal {
+    background: white;
+    /* Light background */
+    color: black;
+}
+
+@keyframes popup {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.settings-icon {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.settings-icon:hover {
+    transform: rotate(90deg);
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    width: 80%;
+}
+
+label {
+    width: 40%;
+    /* Label occupies 50% */
+    font-size: 16px;
+    text-align: center;
+    /* Align text to the right */
+    padding-left: 20px;
+    transition: color 0.3s ease;
+    /* Smooth transition for theme changes */
+}
+
+select,
+input {
+    width: 45%;
+    margin: 0;
+    /* Dropdowns and textboxes take 50% */
+    font-size: 16px;
+    padding: 8px;
+    border: 1px solid;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light Theme Styles */
+body.light label {
+    color: #333;
+    /* Dark text for light theme */
+}
+
+body.light select,
+body.light input {
+    background-color: #fff;
+    /* White background for input fields */
+    border-color: #ccc;
+    /* Light gray border */
+    color: #333;
+    /* Dark text for input fields */
+}
+
+body.light select:focus,
+body.light input:focus {
+    border-color: #4CAF50;
+    /* Highlight border color for focus */
+}
+
+/* Dark Theme Styles */
+body.dark label {
+    color: #ccc;
+    /* Light text for dark theme */
+}
+
+body.dark select,
+body.dark input {
+    background-color: #444;
+    /* Dark gray background for input fields */
+    border-color: #666;
+    /* Gray border */
+    color: #fff;
+    /* Light text for input fields */
+}
+
+body.dark select:focus,
+body.dark input:focus {
+    border-color: #80c783;
+    /* Highlight border color for focus in dark theme */
+}
+
+/* Button Styles */
+button {
+    display: block;
+    margin: 50px auto 25px auto;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light Theme Button */
+body.light button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+body.light button:hover {
+    background-color: #45a049;
+}
+
+/* Dark Theme Button */
+body.dark button {
+    background-color: #666;
+    /* Dark button background */
+    color: #ccc;
+    /* Light text */
+}
+
+body.dark button:hover {
+    background-color: #555;
+    /* Slightly lighter on hover */
+}

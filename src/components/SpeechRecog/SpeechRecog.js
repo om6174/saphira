@@ -54,26 +54,29 @@ function phraseToNumber(phrase) {
     return null;
 }
 
-
-export const startSpeechRecognition = (onResult, projectWaitress) => {
+const initializeRecog = () => {
     // Check for browser compatibility
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
     if (!SpeechRecognition) {
         console.error("Speech Recognition API is not supported in this browser.");
         return;
     }
-
     const recognition = new SpeechRecognition();
 
-    // Configure recognition settings
+    // Configure recognition settings to optimize performance
     recognition.continuous = true; // Allow continuous listening for multiple sentences
-    recognition.interimResults = true; // Provide interim results during speech
+    recognition.interimResults = false; // Provide interim results during speech
+    recognition.lang = 'en-IN'; // Set language to English immediately
+    recognition.maxAlternatives = 1; // Reduce the number of alternatives for better performance
+
+    return recognition;
+}
+export const startSpeechRecognition = (recognition, onResult) => {
 
     let pauseTimer = null; // Track the pause timer
     const pauseThreshold = 1500; // Pause threshold in milliseconds (1.5 seconds)
 
-    // Start speech recognition
+    // Start speech recognition and avoid delay
     recognition.start();
 
     recognition.onstart = function () {
@@ -119,7 +122,6 @@ export const startSpeechRecognition = (onResult, projectWaitress) => {
 
         pauseTimer = setTimeout(() => {
             recognition.stop(); // Stop recognition after pause
-            console.log("Speech Recognition Stopped due to pause.");
         }, pauseThreshold);
     };
 
@@ -136,9 +138,50 @@ export const startSpeechRecognition = (onResult, projectWaitress) => {
         console.error("Speech Recognition did not understand speech.");
     };
 
-    recognition.onsoundend = function () {
-        console.log("Sound ended, stopping recognition.");
-    };
-
     return recognition; // Return recognition instance for optional manual stop
 };
+
+export default {
+    data() {
+        return {
+            speechText: '',
+            recognition: null, // Store the recognition instance
+            isRecording: false, // Track if recording is in progress
+        };
+    },
+    created() {
+        // Start listening for speech when the component is created
+        this.recognition = initializeRecog();
+        eventBus.$on('startListening', this.startListening);
+    },
+    methods: {
+        startListening() {
+            if (this.isRecording) {
+                // Stop the recognition but do not change the state yet
+                this.recognition.stop();
+            } else {
+                // Start a new recognition instance and update the state
+                this.recognition = startSpeechRecognition(this.recognition, this.updateSpeechResult);
+
+                // Set up onend event to change the state when recognition ends
+                this.recognition.onend = () => {
+                    this.isRecording = false; // Update state when recognition ends
+                };
+
+                this.isRecording = true; // Update recording state immediately when starting
+            }
+        },
+        updateSpeechResult(transcript) {
+            this.speechText = transcript;
+        },
+    },
+    beforeDestroy() {
+        // Cleanup recognition if the component is destroyed to avoid memory leaks
+        if (this.recognition) {
+            this.recognition.stop();
+        }
+    },
+};
+
+
+

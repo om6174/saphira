@@ -16,7 +16,15 @@ use std::fs::File;
 use std::io::Read;
 use serde_json;
 use std::env;
-use dotenv::dotenv; // Import dotenv
+use dotenv::dotenv;
+
+mod db;
+mod settings;
+
+use db::{establish_connection, create_settings_table};
+use settings::{set_settings, get_settings, UserSettings};
+use std::sync::Mutex;
+use rusqlite::Connection;
 
 #[derive(Deserialize, Serialize, Debug)]
 struct ProjectConfig {
@@ -64,7 +72,6 @@ fn read_project_config() -> Result<Vec<ProjectConfig>, String> {
 // Tauri Command to generate speech
 #[command]
 async fn generate_speech(dialogue: String) -> Result<Vec<u8>, String> {
-    dotenv().ok(); // This loads the .env file
 
     let audio_dir = "audio_cache";
     fs::create_dir_all(audio_dir).map_err(|e| e.to_string())?;
@@ -75,20 +82,21 @@ async fn generate_speech(dialogue: String) -> Result<Vec<u8>, String> {
     let dialogue_hash = format!("{:x}", hasher.finalize());
     let file_path = format!("{}/{}.wav", audio_dir, dialogue_hash);
 
-    // Check if the file exists
     if StdPath::new(&file_path).exists() {
         println!("Serving cached audio for dialogue: {}", dialogue);
         return fs::read(&file_path).map_err(|e| e.to_string());
     }
 
-    // Generate audio using Deepgram
+    dotenv().ok();
+
     let deepgram_api_key = match env::var("DEEPGRAM_API_KEY") {
         Ok(value) => value,
         Err(_) => {
             eprintln!("DEEPGRAM_API_KEY is not set or could not be read");
-            String::new() // Use an empty string or handle the error as needed
+            String::new()
         }
     };
+
     println!("Generating audio for key: {}", deepgram_api_key);
     let dg_client = Deepgram::new(&deepgram_api_key).map_err(|e| e.to_string())?;
     let options = Options::builder()
@@ -203,9 +211,34 @@ fn open_project(folder_path: String, project_path: String) -> Result<String, Str
     Ok(format!("Project initialized: {}", folder_path))
 }
 
+#[tauri::command]
+fn initialize_db() -> Result<(), String> {
+    let conn = establish_connection().map_err(|e| e.to_string())?;
+    create_settings_table(&conn).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+pub struct AppState {
+    pub db: Mutex<Connection>, // Mutex ensures thread-safe access
+}
+
+#[tauri::command]
+fn set_user_settings(username: String, theme: String, language: String) -> Result<(), String> {
+    let conn = establish_connection().map_err(|e| e.to_string())?;
+    set_settings(&conn, &username, &theme, &language).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn get_user_settings(username: String) -> Result<UserSettings, String> {
+    let conn = establish_connection().map_err(|e| e.to_string())?;
+    let settings = get_settings(&conn, &username).map_err(|e| e.to_string())?;
+    Ok(settings) // Tauri automatically serializes this as JSON
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![open_project,generate_speech,read_project_config])
+        .invoke_handler(tauri::generate_handler![open_project,generate_speech,read_project_config,initialize_db, set_user_settings,get_user_settings])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

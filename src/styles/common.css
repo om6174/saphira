@@ -1,0 +1,98 @@
+/* Global styles for the app */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+body.light{
+    background-color: #f5f5f5;
+}
+
+body.dark{
+    background-color: #302d2d;
+}
+
+
+
+
+/* Section styles remain the same */
+.section {
+    padding: 20px;
+    background-color: rgb(32, 31, 31);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 150px;
+    width: 100%;
+}
+
+/* Title for each section */
+.section h2 {
+    font-size: 24px;
+    color: #4CAF50;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+body.light .section {
+    background-color: #f9f9f9; /* Light gray background */
+    color: #333333; /* Dark text for better contrast */
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2); /* Subtle green shadow */
+}
+
+body.light .section h2 {
+    color: #4CAF50; /* Green title for light theme */
+}
+
+/* Dark Theme */
+body.dark .section {
+    background-color: #292929; /* Darker background */
+    color: #f1f1f1; /* Light text for better readability */
+    box-shadow: 0 4px 8px rgba(18, 184, 151, 0.2); /* Subtle greenish shadow */
+}
+
+body.dark .section h2 {
+    color: #81C784; /* Light green title for dark theme */
+}
+
+/* Button Styling */
+.action-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.action-button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+
+
+/* Optional: Add some spacing between elements inside the container */
+.section>*:not(:last-child) {
+    margin-bottom: 20px;
+}
+
+/* Flexbox utilities */
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+

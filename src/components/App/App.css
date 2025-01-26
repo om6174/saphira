@@ -1,0 +1,94 @@
+/* General Styles */
+#app {
+    text-align: center;
+    width: 100%;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+
+
+/* Main Layout */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 80%;
+    margin: 0 auto;
+    gap: 40px;
+}
+
+body.light .main-container {
+    background-color: #ffffff;
+    /* Light background */
+    color: #000000;
+    /* Dark text for contrast */
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);
+    /* Subtle green shadow */
+    border-radius: 10px;
+}
+
+body.dark .main-container {
+    background-color: #333333;
+    /* Dark background */
+    color: #f1f1f1;
+    /* Light text for contrast */
+    box-shadow: 0 4px 10px rgba(18, 184, 151, 0.2);
+    /* Subtle green shadow */
+    border-radius: 10px;
+}
+
+.top-row,
+.bottom-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .top-row,
+    .bottom-row {
+        width: 100%;
+        align-items: center;
+    }
+}
+
+
+body.light h1 {
+    color: #4CAF50;
+    /* Light theme h1 color */
+}
+
+body.dark h1 {
+    color: #81C784;
+    /* Light green for h1 in dark theme */
+}
+
+body.light p {
+    color: #4CAF50;
+    /* Light theme h1 color */
+}
+
+body.dark p {
+    color: rgb(18, 184, 151);
+    /* Light green for h1 in dark theme */
+}
+
+body.light h3 {
+    color: #4CAF50;
+    /* Light theme h1 color */
+}
+
+body.dark h3 {
+    color: white;
+    /* Light green for h1 in dark theme */
+}
