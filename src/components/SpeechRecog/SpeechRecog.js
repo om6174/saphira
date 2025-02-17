@@ -64,7 +64,7 @@ const initializeRecog = () => {
     const recognition = new SpeechRecognition();
 
     // Configure recognition settings to optimize performance
-    recognition.continuous = true; // Allow continuous listening for multiple sentences
+    recognition.continuous = false; // Allow continuous listening for multiple sentences
     recognition.interimResults = false; // Provide interim results during speech
     recognition.lang = 'en-IN'; // Set language to English immediately
     recognition.maxAlternatives = 1; // Reduce the number of alternatives for better performance
@@ -105,7 +105,7 @@ export const startSpeechRecognition = (recognition, onResult) => {
         if (cleanedTranscript.startsWith("open project")) {
             const projectName = cleanedTranscript.replace("open project", "").trim();
             eventBus.$emit('makeWaitressServeByName', projectName);
-        } else if (cleanedTranscript.startsWith("open")) {
+        } else if (cleanedTranscript.startsWith("open") || cleanedTranscript.includes("project")) {
             const inputStr = cleanedTranscript.replace("open", "").trim();
             const input = phraseToNumber(inputStr);
             if (!isNaN(input)) {
@@ -147,12 +147,14 @@ export default {
             speechText: '',
             recognition: null, // Store the recognition instance
             isRecording: false, // Track if recording is in progress
+            selectedMicrophone: null,
         };
     },
     created() {
-        // Start listening for speech when the component is created
+
         this.recognition = initializeRecog();
         eventBus.$on('startListening', this.startListening);
+
     },
     methods: {
         startListening() {
@@ -161,6 +163,7 @@ export default {
                 this.recognition.stop();
             } else {
                 // Start a new recognition instance and update the state
+                this.recognition = initializeRecog();
                 this.recognition = startSpeechRecognition(this.recognition, this.updateSpeechResult);
 
                 // Set up onend event to change the state when recognition ends

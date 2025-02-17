@@ -1,5 +1,5 @@
 use rusqlite::{params, Connection, Result};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 // Define a struct to hold the user settings
 #[derive(Serialize, Deserialize)]
@@ -20,7 +20,8 @@ pub fn set_settings(conn: &Connection, username: &str, theme: &str, language: &s
 
 // Retrieve settings for a specific username and return them as a JSON object
 pub fn get_settings(conn: &Connection, username: &str) -> Result<UserSettings> {
-    let mut stmt = conn.prepare("SELECT username, theme, language FROM settings WHERE username = ?")?;
+    let mut stmt =
+        conn.prepare("SELECT username, theme, language FROM settings WHERE username = ?")?;
     let settings = stmt.query_row(params![username], |row| {
         Ok(UserSettings {
             username: row.get(0)?,

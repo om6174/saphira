@@ -1,30 +1,45 @@
-use std::process::Command;
-use std::time::{Duration, Instant};
+#![cfg_attr(
+    all(not(debug_assertions), target_os = "windows"),
+    windows_subsystem = "windows"
+)]
+
+use deepgram::speak::options::Options;
+use deepgram::{
+    speak::options::{Container, Encoding, Model},
+    Deepgram,
+};
+use dotenv::dotenv;
+use futures::stream::StreamExt;
+use serde::{Deserialize, Serialize};
+use serde_json;
+use sha2::{Digest, Sha256}; // For hashing dialogue strings
+use std::env;
+use std::fs;
+use std::fs::File;
+use std::io::Read;
+use std::path::Path as StdPath;
+use std::time::{Duration};
 use tauri::command;
 use winapi::shared::windef::HWND;
 use winapi::um::winuser::{
-    EnumWindows, GetWindowTextA, SetForegroundWindow, ShowWindow, SW_MAXIMIZE,
+    EnumWindows, GetWindowTextA, SetForegroundWindow, ShowWindow, AllowSetForegroundWindow, SW_SHOWMAXIMIZED
 };
-use std::fs;
-use std::path::Path as StdPath;
-use sha2::{Sha256, Digest}; // For hashing dialogue strings
-use deepgram::{speak::options::{Container, Encoding, Model}, Deepgram};
-use deepgram::speak::options::Options;
-use futures::stream::StreamExt;
-use serde::{Deserialize, Serialize};
-use std::fs::File;
-use std::io::Read;
-use serde_json;
-use std::env;
-use dotenv::dotenv;
 
 mod db;
 mod settings;
 
-use db::{establish_connection, create_settings_table};
-use settings::{set_settings, get_settings, UserSettings};
-use std::sync::Mutex;
+use db::{create_settings_table, establish_connection};
 use rusqlite::Connection;
+use settings::{get_settings, set_settings, UserSettings};
+use std::sync::Mutex;
+use tauri::Manager;
+use tauri::{path::BaseDirectory};
+use winapi::um::winuser::SW_SHOW;
+use winapi::um::shellapi::ShellExecuteW;
+use std::ptr;
+use std::ffi::OsStr;
+use std::os::windows::ffi::OsStrExt;
+use std::path::Path;
 
 #[derive(Deserialize, Serialize, Debug)]
 struct ProjectConfig {
@@ -34,12 +49,54 @@ struct ProjectConfig {
     project_name: String,
 }
 
+
+fn open_with_shell(exe_path: &str, project_path: &str) -> Result<(), String> {
+    println!("Opening: {} {}", exe_path, project_path);
+    let start_cmd = &format!("{}", exe_path);
+
+    let wide_exe_path: Vec<u16> = OsStr::new(start_cmd)
+        .encode_wide()
+        .chain(Some(0))
+        .collect();
+
+    let wide_project_path: Vec<u16> = OsStr::new(project_path)
+        .encode_wide()
+        .chain(Some(0))
+        .collect();
+
+    let result = unsafe {
+        ShellExecuteW(
+            ptr::null_mut(),
+            ptr::null(),
+            wide_exe_path.as_ptr(),
+            wide_project_path.as_ptr(),
+            ptr::null(),
+            SW_SHOWMAXIMIZED,
+        )
+    };
+
+    if result as isize <= 32 {
+        println!("Error: {}, {}", exe_path, project_path);
+        return Err(format!("Failed to open '{}'", exe_path));
+    }
+
+    Ok(())
+}
+
+
+
 #[command]
-fn read_project_config() -> Result<Vec<ProjectConfig>, String> {
-    let file_path = "../client_paths.json";
-    
+fn read_project_config(app: tauri::AppHandle) -> Result<Vec<ProjectConfig>, String> {
+    let file_path = match app
+        .app_handle()
+        .path()
+        .resolve("../client_paths.json", BaseDirectory::Resource)
+    {
+        Ok(path) => path,
+        Err(e) => return Err(format!("Error resolving path: {}", e)),
+    };
     // Print the file path for debugging purposes
-    println!("Attempting to open file at path: {}", file_path);
+    println!("Attempting to open file at path: {}", file_path.display());
 
     // Attempt to open the file and handle the error if the file doesn't exist
     let mut file = match File::open(file_path) {
@@ -72,7 +129,6 @@ fn read_project_config() -> Result<Vec<ProjectConfig>, String> {
 // Tauri Command to generate speech
 #[command]
 async fn generate_speech(dialogue: String) -> Result<Vec<u8>, String> {
-
     let audio_dir = "audio_cache";
     fs::create_dir_all(audio_dir).map_err(|e| e.to_string())?;
 
@@ -124,43 +180,22 @@ async fn generate_speech(dialogue: String) -> Result<Vec<u8>, String> {
     Ok(audio_data)
 }
 
-// Open command for paths
-fn open_with_command(command: &str, arg: &str) -> Result<(), String> {
-    Command::new(command)
-        .arg(arg)
-        .spawn()
-        .map_err(|e| format!("Failed to open '{}': {}", command, e))?;
-    Ok(())
-}
 
-fn open_without_command(path: &str) -> Result<(), String> {
-    Command::new("cmd")
-        .args(&["/C", "start", "", path])
-        .spawn()
-        .map_err(|e| format!("Failed to open '{}': {}", path, e))?;
-    Ok(())
-}
-
-fn find_window_by_partial_title(partial_title: &str, timeout: Duration) -> Result<HWND, String> {
-    let start_time = Instant::now();
-    while start_time.elapsed() < timeout {
-        let mut found_hwnd: HWND = std::ptr::null_mut();
-        unsafe {
-            EnumWindows(
-                Some(enum_window_proc),
-                &mut (partial_title, &mut found_hwnd) as *mut _ as _,
-            );
-        }
-        if !found_hwnd.is_null() {
-            return Ok(found_hwnd);
-        }
-        std::thread::sleep(Duration::from_millis(100));
+fn find_window_by_partial_title(partial_title: &str) -> Result<HWND, String> {
+    let mut found_hwnd: HWND = std::ptr::null_mut();
+    unsafe {
+        EnumWindows(
+            Some(enum_window_proc),
+            &mut (partial_title, &mut found_hwnd) as *mut _ as _,
+        );
     }
-    Err(format!(
-        "Window with partial title '{}' not found within timeout",
-        partial_title
-    ))
+    if !found_hwnd.is_null() {
+        Ok(found_hwnd)
+    } else {
+        Err(format!("Window with partial title '{}' not found", partial_title))
+    }
 }
+
 
 unsafe extern "system" fn enum_window_proc(hwnd: HWND, lparam: isize) -> i32 {
     let (partial_title, found_hwnd) = &mut *(lparam as *mut (&str, &mut HWND));
@@ -168,7 +203,8 @@ unsafe extern "system" fn enum_window_proc(hwnd: HWND, lparam: isize) -> i32 {
     let length = GetWindowTextA(hwnd, buffer.as_mut_ptr(), buffer.len() as i32);
     if length > 0 {
         let title = std::ffi::CStr::from_ptr(buffer.as_ptr()).to_string_lossy();
-        if title.contains(*partial_title) { // Dereference `partial_title` here
+        if title.contains(*partial_title) {
+            // Dereference `partial_title` here
             **found_hwnd = hwnd;
             return 0; // Stop enumeration
         }
@@ -176,40 +212,57 @@ unsafe extern "system" fn enum_window_proc(hwnd: HWND, lparam: isize) -> i32 {
     1 // Continue enumeration
 }
 
-// Tauri Command to open project folder
+
+fn maximize_and_focus_window(hwnd: HWND) {
+    unsafe {
+        ShowWindow(hwnd, SW_SHOWMAXIMIZED);
+        SetForegroundWindow(hwnd);
+    }
+}
+
 #[command]
 fn open_project(folder_path: String, project_path: String) -> Result<String, String> {
-    let folder_name = StdPath::new(&folder_path)
+    let folder_name = Path::new(&folder_path)
         .file_name()
         .and_then(|name| name.to_str())
         .unwrap_or("");
 
     let explorer_window_title = format!("{} - File Explorer", folder_name);
-
-    // Open Explorer and wait for its window
-    open_without_command(&folder_path)?;
-    let explorer_hwnd = find_window_by_partial_title(&explorer_window_title, Duration::from_secs(2))?;
-    unsafe {
-        ShowWindow(explorer_hwnd, SW_MAXIMIZE);
-        SetForegroundWindow(explorer_hwnd);
-    }
-
-    let project_name = StdPath::new(&project_path)
+    let project_name = Path::new(&project_path)
         .file_name()
         .and_then(|name| name.to_str())
         .unwrap_or("");
 
     let code_window_title = format!("{} - Visual Studio Code", project_name);
-    // Open VS Code and wait for its window using partial title matching
-    open_with_command("C:/Program Files/Microsoft VS Code/Code.exe", &project_path)?;
-    let vs_code_hwnd = find_window_by_partial_title(&code_window_title, Duration::from_secs(2))?;
-    unsafe {
-        ShowWindow(vs_code_hwnd, SW_MAXIMIZE);
-        SetForegroundWindow(vs_code_hwnd);
+
+    // Check if Explorer and VS Code are already open
+    let explorer_hwnd = find_window_by_partial_title(&explorer_window_title).ok();
+    let code_hwnd = find_window_by_partial_title(&code_window_title).ok();
+
+    if explorer_hwnd.is_none(){
+        let _ = open_with_shell(&folder_path, "")?;
+    }else {
+        maximize_and_focus_window(explorer_hwnd.unwrap());
     }
+
+    if code_hwnd.is_none(){
+        let _ = open_with_shell("code", &project_path)?;
+    }else {
+        if !explorer_hwnd.is_none(){
+            maximize_and_focus_window(code_hwnd.unwrap());
+        }
+    }
+    
 
     Ok(format!("Project initialized: {}", folder_path))
 }
+
+
+
+
+
+
+
 
 #[tauri::command]
 fn initialize_db() -> Result<(), String> {
@@ -238,7 +291,15 @@ fn get_user_settings(username: String) -> Result<UserSettings, String> {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![open_project,generate_speech,read_project_config,initialize_db, set_user_settings,get_user_settings])
+        .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![
+            open_project,
+            generate_speech,
+            read_project_config,
+            initialize_db,
+            set_user_settings,
+            get_user_settings
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" id="clock">
+  <defs>
+    <linearGradient id="c">
+      <stop offset="0" stop-color="#402d5f"></stop>
+      <stop offset="1" stop-color="#2f213e"></stop>
+    </linearGradient>
+    <linearGradient id="b">
+      <stop offset="0" stop-color="#fc6a28"></stop>
+      <stop offset="1" stop-color="#f94045"></stop>
+    </linearGradient>
+    <linearGradient xlink:href="#a" id="d" x1="-881.5" x2="-880.5" y1="1073.979" y2="1073.979" gradientUnits="userSpaceOnUse"></linearGradient>
+    <linearGradient id="a">
+      <stop offset="0" stop-color="#485960"></stop>
+      <stop offset="1" stop-color="#3d4e55"></stop>
+    </linearGradient>
+    <linearGradient xlink:href="#b" id="e" x1="-881.06" x2="-876.995" y1="1076.361" y2="1076.361" gradientUnits="userSpaceOnUse"></linearGradient>
+    <linearGradient xlink:href="#c" id="f" x1="-888" x2="-874" y1="1076.361" y2="1076.361" gradientUnits="userSpaceOnUse"></linearGradient>
+    <linearGradient xlink:href="#c" id="g" x1="-882" x2="-880" y1="1076.362" y2="1076.362" gradientUnits="userSpaceOnUse"></linearGradient>
+  </defs>
+  <g transform="translate(889 -1068.361)">
+    <path fill="#e9eded" d="M-874.5 1076.362a6.5 6.5 0 0 1-6.5 6.5 6.5 6.5 0 0 1-6.5-6.5 6.5 6.5 0 0 1 6.5-6.5 6.5 6.5 0 0 1 6.5 6.5z"></path>
+    <path fill="url(#d)" fill-rule="evenodd" d="M-881 1071.44c-.276 0-.496.247-.492.523l-.008.095v3.957c-.01.676 1.01.676 1 0v-3.998c0-.334-.19-.584-.5-.58z" color="#000" font-family="sans-serif" font-weight="400" overflow="visible" style="line-height:normal;text-indent:0;text-align:start;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000;text-transform:none;block-progression:tb;white-space:normal;isolation:auto;mix-blend-mode:normal;solid-color:#000;solid-opacity:1"></path>
+    <path fill="url(#e)" fill-rule="evenodd" d="M-880.553 1075.861a.5.5 0 1 0 0 1h3.051a.5.5 0 1 0 0-1h-3.051z" color="#000" font-family="sans-serif" font-weight="400" overflow="visible" style="line-height:normal;text-indent:0;text-align:start;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000;text-transform:none;block-progression:tb;white-space:normal;isolation:auto;mix-blend-mode:normal;solid-color:#000;solid-opacity:1"></path>
+    <path fill="url(#f)" d="M-881 1069.361c-3.86 0-7 3.14-7 7s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm0 1c3.32 0 6 2.68 6 6s-2.68 6-6 6-6-2.68-6-6 2.68-6 6-6z" color="#000" font-family="sans-serif" font-weight="400" overflow="visible" style="line-height:normal;text-indent:0;text-align:start;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000;text-transform:none;block-progression:tb;white-space:normal;isolation:auto;mix-blend-mode:normal;solid-color:#000;solid-opacity:1"></path>
+    <circle cx="-881" cy="1076.362" r="1" fill="url(#g)"></circle>
+  </g>
+</svg>

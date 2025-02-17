@@ -1,0 +1,68 @@
+.reminders-icon {
+    top: 70px;
+
+}
+
+
+.reminders-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.reminders-table th,
+.reminders-table td {
+    padding: 20px 20px;
+    /* Reduced height and increased width */
+    text-align: center;
+    border-bottom: 2px solid #ddd;
+    /* Light theme bottom border */
+}
+
+.reminders-table th {
+    background-color: #4CAF50;
+    color: white;
+
+}
+
+.reminders-table tbody tr:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+    /* Light green highlight */
+}
+
+body.dark .reminders-table tbody tr:hover {
+    background-color: rgba(102, 102, 102, 0.3);
+    /* Dark gray highlight */
+}
+
+.alarms-table {
+    width: fit-content;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.alarms-table th,
+.alarms-table td {
+    padding: 20px 20px;
+    text-align: center;
+    border-bottom: 2px solid #ddd;
+}
+
+.alarms-table th {
+    background-color: #FF5722;
+    color: white;
+}
+
+.alarms-table tbody tr:hover {
+    background-color: rgba(255, 87, 34, 0.1);
+}
+
+body.dark .alarms-table tbody tr:hover {
+    background-color: rgba(102, 102, 102, 0.3);
+}

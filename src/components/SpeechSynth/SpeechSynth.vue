@@ -12,7 +12,7 @@
 <script>
 
 import DIALOGUES from '../../services/dialogues.js';
-import { speakWithDefaultVoice } from './SpeechSynth.js';
+import { speakWithDefaultVoice, initializeAudioElements } from './SpeechSynth.js';
 
 export default {
   data() {
@@ -24,7 +24,7 @@ export default {
     speakWithDefaultVoice
   },
   created() {
-    
+    initializeAudioElements();
     speakWithDefaultVoice(DIALOGUES.WELCOME_DIALOGUE + DIALOGUES.HELP_DIALOGUE, true);
 
   },

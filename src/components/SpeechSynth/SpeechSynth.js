@@ -1,9 +1,22 @@
 import { invoke } from "@tauri-apps/api/core";
 import eventBus from "../eventBus";
 
+let audioContext;
+let analyser;
+let dataArray;
+
+export const initializeAudioElements = () => {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 512;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+};
 
 export const updateCanvasLineColor = (theme) => {
     const canvas = document.getElementById('waveform');
+    if (!canvas) {
+        return;
+    }
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -37,12 +50,6 @@ export const speakWithDefaultVoice = async (dialogue, autoListen) => {
         let w = canvas.width = canvas.offsetWidth;
         let h = canvas.height = 200;
         const isLightTheme = document.body.classList.contains('light');
-
-        // Audio context and analyser
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 512;
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
         // Initialize audio
         const initializeAudio = () => {
@@ -103,13 +110,13 @@ export const speakWithDefaultVoice = async (dialogue, autoListen) => {
                     ctx.beginPath();
                     ctx.moveTo(0, h / 2);
                     ctx.lineTo(w, h / 2);
-                    if(isLightTheme)
+                    if (isLightTheme)
                         ctx.strokeStyle = "black";
                     else
-                        ctx.strokeStyle = "white";                    
+                        ctx.strokeStyle = "white";
                     ctx.lineWidth = 2;
                     ctx.stroke();
-                    if(autoListen){
+                    if (autoListen) {
                         eventBus.$emit("startListening")
                     }
                 }
@@ -128,7 +135,7 @@ export const speakWithDefaultVoice = async (dialogue, autoListen) => {
             ctx.beginPath();
             ctx.moveTo(0, h / 2);
             ctx.lineTo(w, h / 2);
-            if(isLightTheme)
+            if (isLightTheme)
                 ctx.strokeStyle = "black";
             else
                 ctx.strokeStyle = "white";

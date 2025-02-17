@@ -10,14 +10,27 @@ export default {
     mounted() {
         this.loadClients(); // Call the function to fetch and set the clients
         eventBus.$on('makeWaitressServeByName', this.openProjectByName);
+        eventBus.$on('makeWaitressUpdateClients', this.loadClients);
         eventBus.$on('makeWaitressServeByIndex', this.openProjectByIndex);
-
+        window.addEventListener('keydown', this.handleKeydown);
+    },
+    beforeDestroy() {
+        window.removeEventListener('keydown', this.handleKeydown);
     },
     methods: {
         async loadClients() {
             try {
-                const fetchedClients = await invoke('read_project_config');
-                this.clients = [...fetchedClients]; // Create a new array to trigger reactivity
+                const storedClientPaths = localStorage.getItem('clientPaths');
+                if (storedClientPaths) {
+                    let activeClients = JSON.parse(storedClientPaths)
+                    this.clients = activeClients.filter(cl=>cl.active);
+
+                }
+                else {
+                    const fetchedClients = await invoke('read_project_config');
+                    this.clients = [...fetchedClients]; // Create a new array to trigger reactivity
+
+                }
             } catch (error) {
                 console.error("Failed to load project configuration:", error);
             }
@@ -47,6 +60,14 @@ export default {
             } else {
                 console.error(`Project not found at index: ${index}`);
             }
-        }
+        },
+        handleKeydown(event) {
+            if (event.altKey && event.key >= '1' && event.key <= '9') {
+                const index = parseInt(event.key, 10);
+                if (index <= this.clients.length) {
+                    this.openProjectByIndex(index);
+                }
+            }
+        },
     },
 };
